@@ -251,9 +251,17 @@ function renderFrame() {
 }
 
 let currentImage = null;
+let currentImageFilename = '';
+
+function previewVideoFilename(ext) {
+  const baseName = currentImageFilename.replace(/\.[^.]+$/, '') || 'caneca-360';
+  return `preview ${baseName}.${ext}`;
+}
+
 $('artFile').addEventListener('change', async (ev) => {
   const file = ev.target.files?.[0];
   if (!file) return;
+  currentImageFilename = file.name;
   const url = URL.createObjectURL(file);
   const img = new Image();
   img.onload = () => {
@@ -370,7 +378,7 @@ async function renderVideoMp4WebCodecs(w, h, fps, duration, bitrate) {
     muxer.finalize();
 
     const blob = new Blob([muxer.target.buffer], { type: 'video/mp4' });
-    showDownload(blob, `caneca-360-${w}x${h}.mp4`, 'Baixar vídeo MP4');
+    showDownload(blob, previewVideoFilename('mp4'), 'Baixar vídeo MP4');
     $('status').textContent = `Vídeo MP4 pronto: ${duration}s, ${fps} FPS, ${w}×${h}.`;
   } catch (err) {
     console.error(err);
@@ -430,7 +438,7 @@ async function renderVideoRealtimeWebm(w, h, fps, duration, bitrate, reuse = nul
 
   const finalMime = recorder.mimeType || mime || 'video/webm';
   const blob = new Blob(chunks, { type: finalMime });
-  showDownload(blob, `caneca-360-${w}x${h}.webm`, 'Baixar vídeo WEBM');
+  showDownload(blob, previewVideoFilename('webm'), 'Baixar vídeo WEBM');
 
   if (!reuse) restorePreview(oldSize, oldPixelRatio, oldAspect);
   $('status').textContent = `Vídeo WEBM pronto. Se a duração vier sem metadados, converta com o comando do README.`;
